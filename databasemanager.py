@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import psycopg
 import os
+from psycopg.rows import dict_row
 
 load_dotenv()
 
