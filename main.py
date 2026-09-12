@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from databasemanager import DatabaseManager
+from pydantic import BaseModel
 
 app = FastAPI()
 db = DatabaseManager()
@@ -13,6 +14,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+class DataRequest(BaseModel):
+    last_sync_time: str  # ISO format datetime string
+def check_data(last_sync_time):
+    try:
+        conn, cursor = db.getConnection()
+        if conn is None or cursor is None:
+            return {"error": "Failed to connect to the database."}
+        if last_sync_time is None or last_sync_time.strip() == "null":
+            cursor.execute("SELECT * FROM check_update")
+            res = cursor.fetchall()
+            return {
+                "message":'Download Data now',
+                "data": res
+            }
+        # Execute your SQL query here
+        cursor.execute("SELECT * FROM check_update WHERE updated_at > %s", (last_sync_time,))
+        res = cursor.fetchall()
+        if len(res) == 0:
+            return {
+                "message":'No new data available',
+                'update_available': False
+            }
+
+        return {
+            'update_available': True,
+            "data": res,
+            'message': 'New data available for download'
+        }
+    except Exception as e:
+        return {"error": str(e)}
+        
+    except Exception as e:
+        return {"error": str(e)}
 def get_data():
     try:
         conn, cursor = db.getConnection()
@@ -42,6 +76,11 @@ def download_all_data():
     if "error" in result:
         return {"error": result["error"]}
     return result
+
+@app.post('/api/v1/dmsdata/check_new_data')
+def check_new_data(request: DataRequest):
+    res = check_data(request.last_sync_time)
+    return res
 
 if __name__ == "__main__":
     uvicorn.run('main:app', host="0.0.0.0", port=9990)
