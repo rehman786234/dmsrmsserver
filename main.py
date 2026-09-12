@@ -25,6 +25,7 @@ def check_data(last_sync_time):
             cursor.execute("SELECT * FROM check_update")
             res = cursor.fetchall()
             return {
+                "update_available": True,
                 "message":'Download Data now',
                 "data": res
             }
