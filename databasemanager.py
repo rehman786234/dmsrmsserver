@@ -13,7 +13,7 @@ class DatabaseManager:
                 os.getenv("DATABASE_URL")
             )
 
-            cursor = conn.cursor()
+            cursor = conn.cursor(row_factory=dict_row)
 
             print("Connection Successful")
 
