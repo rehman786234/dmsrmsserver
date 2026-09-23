@@ -16,6 +16,8 @@ app.add_middleware(
 )
 class DataRequest(BaseModel):
     last_sync_time: str  # ISO format datetime string
+class Salesmen(BaseModel):
+    name : str
 def check_data(last_sync_time):
     try:
         conn, cursor = db.getConnection()
@@ -48,7 +50,7 @@ def check_data(last_sync_time):
         
     except Exception as e:
         return {"error": str(e)}
-def get_data():
+def get_data(name,str):
     try:
         conn, cursor = db.getConnection()
         if conn is None or cursor is None:
@@ -67,13 +69,19 @@ def get_data():
         areas = cursor.fetchall()
         cursor.execute("SELECT * FROM sub_areas")  # Replace with your actual table name
         sub_areas = cursor.fetchall()
-        return {"customers": customers, "products": products, "categories": categories, "customer_types": customer_types, "areas": areas, "sub_areas": sub_areas}
+        cursor.execute("SELECT * FROM sales_order WHERE salesmen= %s",(name,)
+        orders = cursor.fetchall()
+        cursor.execute("SELECT * FROM order_prd")
+        order_prd = cursor.fetchall()
+        
+        return {"customers": customers, "products": products, "categories": categories, "customer_types": customer_types, "areas": areas, "sub_areas": sub_areas,
+               "orders":orders,'order_prd': order_prd}
     except Exception as e:
         return {"error": str(e)}
-@app.get('/api/v1/dmsdata/download/all')
-def download_all_data():
+@app.post('/api/v1/dmsdata/download/all')
+def download_all_data(salemen: Salesmen):
     
-    result = get_data()
+    result = get_data(salemen.name)
     if "error" in result:
         return {"error": result["error"]}
     return result
