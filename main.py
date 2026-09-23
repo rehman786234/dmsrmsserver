@@ -69,7 +69,7 @@ def get_data(name:str):
         areas = cursor.fetchall()
         cursor.execute("SELECT * FROM sub_areas")  # Replace with your actual table name
         sub_areas = cursor.fetchall()
-        cursor.execute("SELECT * FROM sales_order WHERE salesmen= %s",(name,))
+        cursor.execute("SELECT * FROM sales_order WHERE salesman= %s",(name,))
         orders = cursor.fetchall()
         cursor.execute("SELECT * FROM order_prd")
         order_prd = cursor.fetchall()
