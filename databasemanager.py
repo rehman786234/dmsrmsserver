@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import psycopg
 import os
-from psycopg.rows import dict_row
 
 load_dotenv()
 
@@ -14,7 +13,7 @@ class DatabaseManager:
                 os.getenv("DATABASE_URL")
             )
 
-            cursor = conn.cursor(row_factory=dict_row)
+            cursor = conn.cursor()
 
             print("Connection Successful")
 
